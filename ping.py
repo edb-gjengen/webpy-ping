@@ -21,7 +21,7 @@ class ping:
     # Configuration
     SCRIPT_PATH = '/opt/github-hooks-recieve/send_to_web.sh'
     WEB_PATH = '/var/www/neuf.no/new/'
-    ALLOWED_REPO_URLS = ['https://github.com/neuf/main',]
+    ALLOWED_REPO_URLS = ['https://github.com/neuf/main','https://github.com/neuf/main']
 
     def script_path(self):
         return os.path.dirname(os.path.abspath(__file__))
@@ -39,7 +39,7 @@ class ping:
             self.log("Repository URL " + data['repository']['url'] + "not allowed, exiting.")
             exit()
 
-        self.update_repo(data)
+        #self.update_repo(data)
         self.send_to_irc(data)
 
         return "thank you :-)"
@@ -74,7 +74,7 @@ class ping:
 
     def log(self, msg):
         # Log pings.
-        log = open(self.script_path() + "pings.log", "a+")
+        log = open(self.script_path() + "/pings.log", "a+")
         log.write(datetime.now().isoformat() + ": " + msg + "\n")
         log.close()
    
