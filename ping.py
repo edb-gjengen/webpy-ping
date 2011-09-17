@@ -1,6 +1,7 @@
-import web
-import simplejson as json
 import urllib
+import os
+import simplejson as json
+import web
 from datetime import datetime
 from subprocess import Popen
 from socket import socket, AF_INET, SOCK_DGRAM
@@ -21,6 +22,9 @@ class ping:
     SCRIPT_PATH = '/opt/github-hooks-recieve/send_to_web.sh'
     WEB_PATH = '/var/www/neuf.no/new/'
     ALLOWED_REPO_URLS = ['https://github.com/neuf/main',]
+
+    def script_path(self):
+        return os.path.dirname(os.path.abspath(__file__))
 
     def POST(self):
         post_data = web.input()
@@ -70,7 +74,7 @@ class ping:
 
     def log(self, msg):
         # Log pings.
-        log = open("/opt/github-hooks-recieve/pings.log", "a+")
+        log = open(self.script_path() + "pings.log", "a+")
         log.write(datetime.now().isoformat() + ": " + msg + "\n")
         log.close()
    
