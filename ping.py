@@ -41,7 +41,7 @@ class ping:
             self.log("Repository URL " + data['repository']['url'] + "not allowed, exiting.")
             exit()
 
-        #self.update_repo(data)
+        #self.update_repo(data) # temp disabled
         self.send_to_irc(data)
 
         return "thank you :-)"
@@ -64,7 +64,7 @@ class ping:
                 who.add(commit['author']['username'])
             who = ", ".join(who)
 
-        return "Github repo \'{0}\': {1} by {2}".format(data['repository']['name'],
+        return "Git commit: \'{0}\': {1} by {2}".format(data['repository']['name'],
                                                data['compare'],
                                                who)
 
