@@ -57,11 +57,11 @@ class ping:
         
         who = ""
         if len(data['commits']) == 1:
-            who = data['commits'][0]['author']['username']
+            who = data['commits'][0]['author']['name']
         else:
             who = set() # unique entries
             for commit in data['commits']:
-                who.add(commit['author']['username'])
+                who.add(commit['author']['name'])
             who = ", ".join(who)
 
         return "Git commit: \'{0}\': {1} by {2}".format(data['repository']['name'],
