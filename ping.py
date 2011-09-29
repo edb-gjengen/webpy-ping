@@ -21,7 +21,9 @@ class ping:
     # Configuration
     SCRIPT_PATH = '/opt/github-hooks-recieve/send_to_web.sh'
     WEB_PATH = '/var/www/neuf.no/new/'
-    ALLOWED_REPO_URLS = ['https://github.com/neuf/main','https://github.com/neuf/main']
+    ALLOWED_REPO_URLS = ['https://github.com/neuf/main',
+        'https://github.com/neuf/DNSapp',
+        'http://git.neuf.no/?p=webpy-ping.git']
 
     def script_path(self):
         return os.path.dirname(os.path.abspath(__file__))
