@@ -70,9 +70,9 @@ class ping:
 
     def send_to_irc(self, data):
         # Send the message to snurr via UDP.
-        irc_data = self.format_for_irc(data)
+        data = self.format_for_irc(data)
         udp = socket(AF_INET, SOCK_DGRAM)
-        udp.sendto(irc_data, ('nintendo.neuf.no', 55666))
+        udp.sendto(data, ('nintendo.neuf.no', 55666))
 
     def log(self, msg):
         # Log pings.
