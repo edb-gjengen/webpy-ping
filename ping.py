@@ -5,10 +5,20 @@ import web
 from datetime import datetime
 from subprocess import Popen
 from socket import socket, AF_INET, SOCK_DGRAM
+
+import settings
 """
-Recieve pings from Github and:
-    - Sync local repo and web.
-    - Send a message to snurr (udp2irc-bot).
+Recieve pings from Github Webhook API and perform actions.
+
+Examples of actions:
+    - Run a script to deploy on your webserver. Yup.
+    - Send a message to IRC (via an ircbot listening for UDP-messages). Yup.
+    - Send an email.
+    - Send a signal to an Arduino.
+
+TODO:
+ - Provide deploy log
+ - Send mail to commiter on error.
 
 Written in web.py
 """
@@ -18,52 +28,64 @@ urls = (
 )
 
 class ping:
-    # Configuration
-    SCRIPT_PATH = '/opt/github-hooks-recieve/send_to_web.sh'
-    WEB_PATH = '/var/www/neuf.no/new/'
-    ALLOWED_REPO_URLS = ['https://github.com/neuf/main',
-        'https://github.com/neuf/DNSapp',
-        'http://git.neuf.no/?p=webpy-ping.git']
-
+    
     def script_path(self):
         return os.path.dirname(os.path.abspath(__file__))
+
+    def url_allowed(self,url):
+        for allowed_url, deploy_to in settings.REPOS.iteritems():
+            if url == allowed_url:
+                return True
+        return False
 
     def POST(self):
         post_data = web.input()
         try:
             data = json.loads(post_data['payload'])
         except ValueError:
-            self.log("Got ping with non-JSON POST-data" + post_data)
-            exit()
+            error = "Got ping with non-JSON POST-data: \'" + str(post_data) + "\'"
+            self.log(error)
+            return json.dumps({'result': error})
 
-        self.log("post_data: " + str(post_data))
-        if data['repository']['url'] not in self.ALLOWED_REPO_URLS:
-            self.log("Repository URL " + data['repository']['url'] + "not allowed, exiting.")
-            exit()
+        repo_url = data['repository']['url']
+        repo_name = data['repository']['name']
+        self.log("Got ping. Repo: " + repo_name + " Commit by: " + self.format_who(data['commits']) + ".")
+        if not self.url_allowed(repo_url):
+            not_allowed = "Repository URL \'" + repo_url + "\' not allowed." 
+            self.log(not_allowed)
+            return not_allowed
 
-        #self.update_repo(data) # temp disabled
+        # TODO: Make optional in settings
+        self.update_repo(data['repository']['name'], repo_url)
         self.send_to_irc(data)
 
-        return "thank you :-)"
+        return json.dumps({'result' : "Thank you :-)"})
 
-    def update_repo(self, data):
-        # Update repository locally and push to web
-        args = ['/bin/sh', self.SCRIPT_PATH, self.WEB_PATH, data['repository']['url']]
-        self.log("Updating repo with command: \'" + " ".join(args) + "\'")
+    def update_repo(self, name, url):
+        if not settings.REPOS[url]:
+            self.log("No deploy path defined.")
+            return
+        # run the deployscript
+        args = ['/bin/sh', settings.DEPLOY_SCRIPT_PATH,
+            settings.REPOS[url], name]
+        self.log("Updating repo: \'" + " ".join(args) + "\'")
         p = Popen(args)
 
-    def format_for_irc(self, data):
-        # String to be sent to irc.
-        
+    def format_who(self, commits):
         who = ""
-        if len(data['commits']) == 1:
-            who = data['commits'][0]['author']['name']
+        if len(commits) == 1:
+            who = commits[0]['author']['name']
         else:
             who = set() # unique entries
-            for commit in data['commits']:
+            for commit in commits:
                 who.add(commit['author']['name'])
             who = ", ".join(who)
 
+        return who 
+
+    def format_for_irc(self, data):
+        # String to be sent to irc.
+        who = self.format_who(data['commits'])
         return "Git commit: \'{0}\': {1} by {2}".format(data['repository']['name'],
                                                data['compare'],
                                                who)
@@ -72,7 +94,7 @@ class ping:
         # Send the message to snurr via UDP.
         data = self.format_for_irc(data)
         udp = socket(AF_INET, SOCK_DGRAM)
-        udp.sendto(data, ('nintendo.neuf.no', 55666))
+        udp.sendto(data, settings.IRC_BOT_HOST)
 
     def log(self, msg):
         # Log pings.
@@ -80,7 +102,7 @@ class ping:
         log.write(datetime.now().isoformat() + ": " + msg + "\n")
         log.close()
    
-app = web.application(urls, globals(), autoreload=False)
+app = web.application(urls, globals(), autoreload=True)
 application = app.wsgifunc()
 
 if __name__ == "__main__":

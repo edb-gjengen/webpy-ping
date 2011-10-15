@@ -1,4 +1,4 @@
-send_to_web.sh
 *.swp
 *.pyc
 pings.log
+settings.py
