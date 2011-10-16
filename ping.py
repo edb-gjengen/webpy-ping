@@ -6,6 +6,11 @@ from datetime import datetime
 from subprocess import Popen
 from socket import socket, AF_INET, SOCK_DGRAM
 
+# import settings (full path to cur dir has to be on path).
+import sys
+path = os.path.dirname(os.path.abspath(__file__))
+if path not in sys.path:
+    sys.path.append(path)
 import settings
 """
 Recieve pings from Github Webhook API and perform actions.
