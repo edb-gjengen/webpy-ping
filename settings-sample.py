@@ -1,5 +1,9 @@
 # Configuration
 
+# Url shortening
+BITLY_USERNAME = '' # username ('' = disabled)
+BITLY_API_KEY = ''
+
 DEPLOY_SCRIPT_PATH = '/opt/git-deploy.sh'
 # Mappings from allowed url to deploy path.
 REPOS = {
