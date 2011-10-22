@@ -6,12 +6,6 @@ from datetime import datetime
 from subprocess import Popen
 from socket import socket, AF_INET, SOCK_DGRAM
 
-# import settings (full path to cur dir has to be on path).
-import sys
-path = os.path.dirname(os.path.abspath(__file__))
-if path not in sys.path:
-    sys.path.append(path)
-import settings
 """
 Recieve pings from Github Webhook API and perform actions.
 
@@ -27,10 +21,6 @@ TODO:
 
 Written in web.py
 """
-
-urls = (
-    '/', 'ping',
-)
 
 class ping:
     
@@ -87,13 +77,23 @@ class ping:
                 who.add(commit['author']['name'])
             who = ", ".join(who)
 
-        return who 
+        return who
+
+    def shorten_url(self, url): 
+        if settings.BITLY_USERNAME and settings.BITLY_API_KEY:
+            import bitly_api
+            c = bitly_api.Connection(settings.BITLY_USERNAME,
+                                     settings.BITLY_API_KEY)
+            return c.shorten(url)
+        else:
+            return url
 
     def format_for_irc(self, data):
         # String to be sent to irc.
         who = self.format_who(data['commits'])
+        compare_url = shorten_url(data['compare'])
         return "Git commit: \'{0}\': {1} by {2}".format(data['repository']['name'],
-                                               data['compare'],
+                                               compare_url,
                                                who)
 
     def send_to_irc(self, data):
@@ -108,7 +108,20 @@ class ping:
         log.write(datetime.now().isoformat() + ": " + msg + "\n")
         log.close()
    
-app = web.application(urls, globals(), autoreload=True)
+# import settings (full path to cur dir has to be on path).
+import sys
+path = os.path.dirname(os.path.abspath(__file__))
+if path not in sys.path:
+    sys.path.append(path)
+import settings
+
+# define urls
+urls = (
+    '/', 'ping',
+)
+
+# run app
+app = web.application(urls, globals(), autoreload=False)
 application = app.wsgifunc()
 
 if __name__ == "__main__":
