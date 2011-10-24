@@ -91,7 +91,7 @@ class ping:
     def format_for_irc(self, data):
         # String to be sent to irc.
         who = self.format_who(data['commits'])
-        compare_url = shorten_url(data['compare'])
+        compare_url = self.shorten_url(data['compare'])
         return "Git commit: \'{0}\': {1} by {2}".format(data['repository']['name'],
                                                compare_url,
                                                who)
