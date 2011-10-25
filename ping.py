@@ -84,7 +84,7 @@ class ping:
             import bitly_api
             c = bitly_api.Connection(settings.BITLY_USERNAME,
                                      settings.BITLY_API_KEY)
-            return c.shorten(url)
+            return c.shorten(url)['url']
         else:
             return url
 

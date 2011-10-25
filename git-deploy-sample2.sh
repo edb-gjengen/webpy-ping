@@ -19,6 +19,7 @@ unset GID_DIR
         git submodule foreach 'rm -rf .git/'
     fi
     rm -rf .git
+    echo "Copying contents of '$TMP_DIR' to '$DEPLOY_DIR'..."
     cp -R $TMP_DIR/* $DEPLOY_DIR
     rm -rf $TMP_DIR
 } >> "$DIR/deploy.log"
