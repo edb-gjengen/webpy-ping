@@ -35,10 +35,14 @@ class ping:
 
     def POST(self):
         post_data = web.input()
+        data = post_data.get('payload')
+        if not data:
+            error = "Error: No payload in POST."
+            return json.dumps({'result': error})
         try:
-            data = json.loads(post_data['payload'])
-        except ValueError:
-            error = "Got ping with non-JSON POST-data: \'" + str(post_data) + "\'"
+            data = json.loads(data)
+        except (ValueError, TypeError):
+            error = "Error: Got ping with non-JSON POST-data: \'" + str(post_data) + "\'"
             self.log(error)
             return json.dumps({'result': error})
 
@@ -62,8 +66,7 @@ class ping:
             return
         # run the deployscript
         # TODO: send clone url instead to support remote repos
-        args = ['/bin/sh', settings.DEPLOY_SCRIPT_PATH,
-            settings.REPOS[url], name]
+        args = [settings.DEPLOY_SCRIPT_PATH, settings.REPOS[url], name]
         self.log("Updating repo: \'" + " ".join(args) + "\'")
         p = Popen(args)
 
