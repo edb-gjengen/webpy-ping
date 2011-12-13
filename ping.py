@@ -1,6 +1,8 @@
-import urllib
+# coding: utf8
+import codecs
 import os
 import simplejson as json
+import urllib
 import web
 from datetime import datetime
 from subprocess import Popen
@@ -107,7 +109,7 @@ class ping:
 
     def log(self, msg):
         # Log pings.
-        log = open(self.script_path() + "/pings.log", "a+")
+        log = codecs.open(self.script_path() + "/pings.log", "a+", encoding="utf-8")
         log.write(datetime.now().isoformat() + ": " + msg + "\n")
         log.close()
    
