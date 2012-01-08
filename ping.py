@@ -1,12 +1,12 @@
-# coding: utf8
 import codecs
 import os
 import simplejson as json
 import urllib
 import web
+
 from datetime import datetime
-from subprocess import Popen
 from socket import socket, AF_INET, SOCK_DGRAM
+from subprocess import Popen
 
 """
 Recieve pings from Github Webhook API and perform actions.
@@ -81,8 +81,7 @@ class ping:
             for commit in commits:
                 who.add(commit['author']['name'])
             who = ", ".join(who)
-
-        return who
+        return who.split()[0]
 
     def shorten_url(self, url): 
         if settings.BITLY_USERNAME and settings.BITLY_API_KEY:
@@ -95,11 +94,13 @@ class ping:
 
     def format_for_irc(self, data):
         # String to be sent to irc.
+        commit_msg = data['commits'][0]['message']
         who = self.format_who(data['commits'])
         compare_url = self.shorten_url(data['compare'])
-        return "Git commit: \'{0}\': {1} by {2}".format(data['repository']['name'],
-                                               compare_url,
-                                               who)
+        return "[{0}] {1} (by {2}): {3}".format(data['repository']['name'],
+                                                commit_msg,
+                                                who,
+                                                compare_url)
 
     def send_to_irc(self, data):
         # Send the message to snurr via UDP.
@@ -109,7 +110,9 @@ class ping:
 
     def log(self, msg):
         # Log pings.
-        log = codecs.open(self.script_path() + "/pings.log", "a+", encoding="utf-8")
+        log = codecs.open(self.script_path() + "/pings.log",
+                          "a+",
+                          encoding='utf-8')
         log.write(datetime.now().isoformat() + ": " + msg + "\n")
         log.close()
    
