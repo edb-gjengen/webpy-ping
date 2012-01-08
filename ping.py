@@ -99,7 +99,7 @@ class ping:
         who = self.format_who(data['commits'])
         compare_url = self.shorten_url(data['compare'])
         return "[{0}] {1} (by {2}): {3}".format(data['repository']['name'],
-                                                commit_msg.trim(),
+                                                commit_msg,
                                                 who,
                                                 compare_url)
 
