@@ -95,13 +95,13 @@ class ping:
 
     def format_for_irc(self, data):
         # String to be sent to irc.
-        commit_msg = data['commits'][0]['message'].strip()
+        commit_msg = data['commits'][0]['message'].strip()[:50]
         who = self.format_who(data['commits'])
         compare_url = self.shorten_url(data['compare'])
-        return "[{0}] {1} (by {2}): {3}".format(data['repository']['name'],
+        return u"[{0}] {1} (by {2}): {3}".format(data['repository']['name'],
                                                 commit_msg,
                                                 who,
-                                                compare_url)
+                                                compare_url).encode('utf8')
 
     def send_to_irc(self, data):
         # Send the message to snurr via UDP.
