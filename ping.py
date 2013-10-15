@@ -94,7 +94,7 @@ class ping:
 
     def format_for_irc(self, data):
         # String to be sent to irc.
-        commit_msg = data['commits'][0]['message'].strip()[:50]
+        commit_msg = data['commits'][0]['message'].strip().split("\n")[0][:50]
         who = self.format_who(data['commits'])
         compare_url = self.shorten_url(data['compare'])
         if len(data['commits']) > 1:
