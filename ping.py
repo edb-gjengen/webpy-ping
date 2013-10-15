@@ -2,7 +2,6 @@
 import codecs
 import os
 import simplejson as json
-import urllib
 import web
 
 from datetime import datetime
@@ -71,7 +70,7 @@ class ping:
         # TODO: send clone url instead to support remote repos
         args = [settings.DEPLOY_SCRIPT_PATH, settings.REPOS[url], name]
         self.log("Updating repo: \'" + " ".join(args) + "\'")
-        p = Popen(args)
+        Popen(args)
 
     def format_who(self, commits):
         who = ""
@@ -98,6 +97,10 @@ class ping:
         commit_msg = data['commits'][0]['message'].strip()[:50]
         who = self.format_who(data['commits'])
         compare_url = self.shorten_url(data['compare'])
+        if len(data['commits']) > 1:
+            return "[{0}] *Multiple new commits*: {3}".format(
+                data['repository']['name'],
+                compare_url).encode('utf8')
         return u"[{0}] {1} (by {2}): {3}".format(data['repository']['name'],
                                                 commit_msg,
                                                 who,
