@@ -98,7 +98,7 @@ class ping:
         who = self.format_who(data['commits'])
         compare_url = self.shorten_url(data['compare'])
         if len(data['commits']) > 1:
-            return "[{0}] *Multiple new commits*: {3}".format(
+            return "[{0}] *Multiple new commits*: {1}".format(
                 data['repository']['name'],
                 compare_url).encode('utf8')
         return u"[{0}] {1} (by {2}): {3}".format(data['repository']['name'],
