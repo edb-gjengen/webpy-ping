@@ -72,8 +72,7 @@ class Ping:
             self.log("No deploy path defined.")
             return
         # run the deployscript
-        # TODO: send clone url instead to support remote repos
-        args = [settings.DEPLOY_SCRIPT_PATH, settings.REPOS[url], name]
+        args = [settings.DEPLOY_SCRIPT_PATH, settings.REPOS[url], url]
         self.log("Updating repo: \'" + " ".join(args) + "\'")
         Popen(args)
 
