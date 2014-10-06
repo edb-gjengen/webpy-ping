@@ -1,43 +1,48 @@
 # coding: utf8
 import codecs
 import os
-import simplejson as json
-import web
-
 from datetime import datetime
 from socket import socket, AF_INET, SOCK_DGRAM
 from subprocess import Popen
+import sys
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
-"""
-Recieve pings from Github Webhook API and perform actions.
+import web
 
-Examples of actions:
-    - Run a script to deploy on your webserver. Yup.
-    - Send a message to IRC (via an ircbot listening for UDP-messages). Yup.
-    - Send an email.
-    - Send a signal to an Arduino.
 
-TODO:
- - Provide deploy log
- - Send mail to commiter on error.
+class Ping:
+    """
+    Recieve pings from Github Webhook API and perform actions.
 
-Written in web.py
-"""
+    Examples of actions:
+        - Run a script to deploy on your webserver. Yup.
+        - Send a message to IRC (via an ircbot listening for UDP-messages). Yup.
+        - Send an email.
+        - Send a signal to an Arduino.
 
-class ping:
+    TODO:
+     - Provide deploy log
+     - Send mail to commiter on error.
+
+    Written in web.py
+    """
+    def __init__(self):
+        pass
     
     def script_path(self):
         return os.path.dirname(os.path.abspath(__file__))
 
-    def url_allowed(self,url):
+    def url_allowed(self, url):
         for allowed_url, deploy_to in settings.REPOS.iteritems():
             if url == allowed_url:
                 return True
         return False
 
     def POST(self):
-        post_data = web.input()
-        data = post_data.get('payload')
+        data = web.data()
         if not data:
             error = "Error: No payload in POST."
             return json.dumps({'result': error})
@@ -60,7 +65,7 @@ class ping:
         self.update_repo(data['repository']['name'], repo_url)
         self.send_to_irc(data)
 
-        return json.dumps({'result' : "Thank you :-)"})
+        return json.dumps({'result': "Thank you :-)"})
 
     def update_repo(self, name, url):
         if not settings.REPOS[url]:
@@ -73,11 +78,10 @@ class ping:
         Popen(args)
 
     def format_who(self, commits):
-        who = ""
         if len(commits) == 1:
             who = commits[0]['author']['name']
         else:
-            who = set() # unique entries
+            who = set()  # unique entries
             for commit in commits:
                 who.add(commit['author']['name'])
             who = ", ".join(who)
@@ -103,10 +107,11 @@ class ping:
                 who,
                 len(data['commits']),
                 compare_url).encode('utf8')
-        return u"[{0}] {1} (by {2}): {3}".format(data['repository']['name'],
-                                                commit_msg,
-                                                who,
-                                                compare_url).encode('utf8')
+        return u"[{0}] {1} (by {2}): {3}".format(
+            data['repository']['name'],
+            commit_msg,
+            who,
+            compare_url).encode('utf8')
 
     def send_to_irc(self, data):
         # Send the message to snurr via UDP.
@@ -122,8 +127,8 @@ class ping:
         log.write(datetime.now().isoformat() + ": " + msg + "\n")
         log.close()
    
+
 # import settings (full path to cur dir has to be on path).
-import sys
 path = os.path.dirname(os.path.abspath(__file__))
 if path not in sys.path:
     sys.path.append(path)
@@ -131,7 +136,7 @@ import settings
 
 # define urls
 urls = (
-    '/', 'ping',
+    '/', 'Ping',
 )
 
 # run app
